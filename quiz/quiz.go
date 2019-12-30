@@ -4,16 +4,22 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
-var csvPath string
-var limit int
+var (
+	csvPath string
+	limit   int
+	shuffle bool
+)
 
 func init() {
 	flag.StringVar(&csvPath, "csv", "problems.csv", `a csv file in the format of 'questions,answers'`)
 	flag.IntVar(&limit, "limit", 30, "time limit for the quiz in seconds")
+	flag.BoolVar(&shuffle, "shuffle", false, "shuffle questions before asking")
 }
 
 func askQuestions(questions [][]string, correctAnswers *int, exit chan bool) {
@@ -22,7 +28,7 @@ func askQuestions(questions [][]string, correctAnswers *int, exit chan bool) {
 		fmt.Printf("Question #%d: %s = ", i+1, row[0])
 		fmt.Scanln(&ans)
 
-		if ans == row[1] {
+		if strings.TrimSpace(ans) == row[1] {
 			*correctAnswers++
 		}
 	}
@@ -53,6 +59,11 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if shuffle {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(questions), func(i, j int) { questions[i], questions[j] = questions[j], questions[i] })
 	}
 
 	var correctAnswers int
