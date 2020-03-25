@@ -1,4 +1,4 @@
-package main
+package gophercises
 
 import (
 	"encoding/csv"
