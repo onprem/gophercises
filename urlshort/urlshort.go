@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -70,8 +71,30 @@ func parseYaml(yamlBytes []byte) ([]pathURL, error) {
 }
 
 type pathURL struct {
-	Path string `yaml:"path"`
-	URL  string `yaml:"url"`
+	Path string `yaml:"path" json:"path"`
+	URL  string `yaml:"url" json:"url"`
+}
+
+// JSONHandler will parse the provided JSON and tries
+// to map any Path provides with it's URL
+func JSONHandler(jsonBytes []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsedJSON, err := parseJSON(jsonBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	paths := buildMap(parsedJSON)
+	return MapHandler(paths, fallback), err
+}
+
+func parseJSON(jsonBytes []byte) ([]pathURL, error) {
+	var pathURLs []pathURL
+	err := json.Unmarshal(jsonBytes, &pathURLs)
+	if err != nil {
+		return nil, err
+	}
+
+	return pathURLs, nil
 }
 
 // Hello says hello to world

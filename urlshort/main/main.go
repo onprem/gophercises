@@ -30,8 +30,25 @@ func main() {
 		panic(err)
 	}
 
+	json := `
+[
+	{
+		"path": "/github",
+		"url": "https://github.com/prmsrswt"
+	},
+	{
+		"path": "/gitlab",
+		"url": "https://gitlab.com/prmsrswt"
+	}
+]
+`
+	jsonHandler, err := urlshort.JSONHandler([]byte(json), yamlHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", jsonHandler)
 }
 
 func defaultMux() *http.ServeMux {
