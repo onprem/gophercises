@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 
 	"github.com/prmsrswt/gophercises/adventure"
@@ -9,6 +11,7 @@ import (
 
 func main() {
 	file, err := os.Open("gopher.json")
+	port := 8080
 	if err != nil {
 		panic("Cannot read file : gopher.json")
 	}
@@ -16,8 +19,14 @@ func main() {
 
 	story, err := adventure.ParseStory(file)
 	if err != nil {
-		panic("Cannot read file : gopher.json")
+		panic("Error parsing json")
 	}
 
-	fmt.Println(story["intro"].Title)
+	h := adventure.NewHandler(story)
+	mux := http.NewServeMux()
+
+	mux.Handle("/", h)
+
+	fmt.Printf("Server starting on port %d\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), mux))
 }
