@@ -1,0 +1,62 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose your own Adventure</title>
+</head>
+<body>
+  <section class="page">
+    <h1>{{ .Title }}</h1>
+    <div class="story">
+      {{ range .Story }}
+        <p>{{ . }}</p>
+      {{ end }}
+    </div>
+    {{ if .Options }}
+      <div class="options">
+        <b>What would you do?</b>
+        {{ range .Options }}
+          <a href="{{ .Arc }}">{{ .Text }}</a>
+        {{ end }}
+      </div>
+    {{ else }}
+      <b>The End</b>
+    {{ end }}
+  </section>
+  <style>
+    body {
+      min-height: 100vh;
+      font-family: Helvetica, sans-serif;
+      background: #2d2e37;
+      color: white;
+      font-size: 1.5em;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 50px 100px;
+    }
+    .story {
+      width: 80%;
+      max-width: 1100px;
+      text-align: justify;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    a {
+      text-decoration: none;
+      color: rgb(146, 183, 250);
+      margin-bottom: 15px;
+    }
+    b {
+      margin: 25px 0;
+    }
+  </style>
+</body>
+</html>

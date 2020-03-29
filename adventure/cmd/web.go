@@ -1,7 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -9,11 +12,20 @@ import (
 	"github.com/prmsrswt/gophercises/adventure"
 )
 
+var (
+	port      int
+	storyPath string
+)
+
+func init() {
+	flag.StringVar(&storyPath, "story", "gopher.json", "path of the JSON file containing story")
+	flag.IntVar(&port, "port", 8080, "the port to start the server on")
+}
+
 func main() {
-	file, err := os.Open("gopher.json")
-	port := 8080
+	file, err := os.Open(storyPath)
 	if err != nil {
-		panic("Cannot read file : gopher.json")
+		panic("Cannot read story file")
 	}
 	defer file.Close()
 
@@ -22,7 +34,17 @@ func main() {
 		panic("Error parsing json")
 	}
 
-	h := adventure.NewHandler(story)
+	tplByte, err := ioutil.ReadFile("story.html")
+	if err != nil {
+		panic("Error reading story template")
+	}
+
+	tpl, err := template.New("").Parse(string(tplByte))
+	if err != nil {
+		panic("Error parsing story template")
+	}
+
+	h := adventure.NewHandler(story, adventure.WithTemplate(tpl))
 	mux := http.NewServeMux()
 
 	mux.Handle("/", h)
