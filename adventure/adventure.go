@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+var tpl *template.Template
+
+func init() {
+	tpl = template.Must(template.New("").Parse(templateString))
+}
+
 // StoryArc is a part of story, kind of like a chapter
 // which leads to other arcs
 type StoryArc struct {
@@ -19,12 +25,6 @@ type StoryArc struct {
 		Arc  string `json:"arc"`
 	} `json:"options"`
 }
-
-func init() {
-	tpl = template.Must(template.New("").Parse(templateString))
-}
-
-var tpl *template.Template
 
 // Story represents a Choose Your Own Adventure story.
 // Each key is the name of a story chapter (aka "arc"), and
