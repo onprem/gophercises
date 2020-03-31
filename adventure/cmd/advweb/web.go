@@ -23,6 +23,8 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+
 	file, err := os.Open(storyPath)
 	if err != nil {
 		panic("Cannot read story file")

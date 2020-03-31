@@ -22,6 +22,8 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+
 	file, err := os.Open(storyPath)
 	if err != nil {
 		panic("Error opening json file")
