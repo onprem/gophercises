@@ -1,13 +1,19 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/prmsrswt/gophercises/sitemap"
 )
 
 func main() {
-	s, err := sitemap.BuildSitemap("http://calhoun.io/")
+	var url string
+	flag.StringVar(&url, "url", "http://calhoun.io", "URL to build SiteMap for")
+
+	flag.Parse()
+
+	s, err := sitemap.BuildSitemap(url)
 	if err != nil {
 		panic(err)
 	}
