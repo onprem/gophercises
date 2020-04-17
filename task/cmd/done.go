@@ -50,7 +50,7 @@ func done(cmd *cobra.Command, args []string) {
 	fmt.Println(taskMsg)
 
 	for i, v := range tasks {
-		fmt.Printf("%d. %s %s\n", i+1, v.Value, v.TimeStamp)
+		fmt.Printf("%d. %s\n", i+1, v.Value)
 	}
 }
 

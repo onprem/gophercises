@@ -213,6 +213,39 @@ func (s *Store) CompleteTask(id int) (Task, error) {
 	return data, err
 }
 
+// DeleteTask deletes a specific task given it's ID
+func (s *Store) DeleteTask(id int) (Task, error) {
+	var data Task
+
+	err := s.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketName)
+		if b == nil {
+			return fmt.Errorf("Bucket doesn't exist")
+		}
+
+		v := b.Get(itob(id))
+		if v == nil {
+			return fmt.Errorf("Key does not exist")
+		}
+
+		err := json.Unmarshal(v, &data)
+		if err != nil {
+			return fmt.Errorf("Error decoding json: %s", err)
+		}
+
+		return b.Delete(itob(id))
+	})
+
+	return data, err
+}
+
+// DeleteAllTasks deletes all tasks by deleting thw whole bucket
+func (s *Store) DeleteAllTasks() error {
+	return s.DB.Update(func(tx *bolt.Tx) error {
+		return tx.DeleteBucket(bucketName)
+	})
+}
+
 // Close closes the database backing the store
 func (s *Store) Close() {
 	s.DB.Close()
