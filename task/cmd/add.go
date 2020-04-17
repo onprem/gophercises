@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,9 +20,22 @@ var addCmd = &cobra.Command{
 }
 
 func add(cmd *cobra.Command, args []string) {
-	fmt.Println("This is a fake \"add\" command")
-	task := strings.Join(args, " ")
-	fmt.Println("Adding:", task)
+	data := strings.Join(args, " ")
+
+	s, err := newStore()
+	if err != nil {
+		fmt.Println("Error creating store:", err)
+		os.Exit(1)
+	}
+	defer s.db.Close()
+
+	err = s.insertTask(data)
+	if err != nil {
+		fmt.Println("Error inserting task to db:", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Added \"%s\" to your task list.\n", data)
 }
 
 func init() {
