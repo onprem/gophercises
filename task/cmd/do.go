@@ -40,6 +40,11 @@ func do(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	if i > len(tasks) || i <= 0 {
+		fmt.Println("Error: Invalid ID")
+		os.Exit(1)
+	}
+
 	id := tasks[i-1].ID
 
 	data, err := s.CompleteTask(id)

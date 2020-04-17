@@ -4,11 +4,13 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 
 	bolt "go.etcd.io/bbolt"
 )
 
-var path = "tasks.db"
+var dbPath = "tasks.db"
 var bucketName = []byte("tasks")
 
 // Store represents a task store with various high level helper methods
@@ -25,7 +27,17 @@ type Task struct {
 
 // NewStore creates and bootstraps a new task store
 func NewStore() (*Store, error) {
-	db, err := bolt.Open(path, 0600, nil)
+	confDir, err := os.UserConfigDir()
+	if err != nil {
+		return nil, err
+	}
+	baseDir := path.Join(confDir, "task")
+	err = os.MkdirAll(baseDir, 0755)
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := bolt.Open(path.Join(baseDir, dbPath), 0600, nil)
 	if err != nil {
 		return nil, err
 	}
