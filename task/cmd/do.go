@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/prmsrswt/gophercises/task/store"
 	"github.com/spf13/cobra"
 )
 
@@ -20,12 +21,12 @@ var doCmd = &cobra.Command{
 }
 
 func do(cmd *cobra.Command, args []string) {
-	s, err := newStore()
+	s, err := store.NewStore()
 	if err != nil {
 		fmt.Println("Error creating store:", err)
 		os.Exit(1)
 	}
-	defer s.db.Close()
+	defer s.Close()
 
 	i, err := strconv.Atoi(args[0])
 	if err != nil {
@@ -33,7 +34,7 @@ func do(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	tasks, err := s.getActiveTasks()
+	tasks, err := s.GetActiveTasks()
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
@@ -41,12 +42,12 @@ func do(cmd *cobra.Command, args []string) {
 
 	id := tasks[i-1].ID
 
-	data, err := s.completeTask(id)
+	data, err := s.CompleteTask(id)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	fmt.Printf("You have completed the \"%s\" task.\n", data.Task)
+	fmt.Printf("You have completed the \"%s\" task.\n", data.Value)
 }
 
 func init() {

@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/prmsrswt/gophercises/task/store"
 	"github.com/spf13/cobra"
 )
 
@@ -22,14 +23,14 @@ var addCmd = &cobra.Command{
 func add(cmd *cobra.Command, args []string) {
 	data := strings.Join(args, " ")
 
-	s, err := newStore()
+	s, err := store.NewStore()
 	if err != nil {
 		fmt.Println("Error creating store:", err)
 		os.Exit(1)
 	}
-	defer s.db.Close()
+	defer s.Close()
 
-	err = s.insertTask(data)
+	err = s.InsertTask(data)
 	if err != nil {
 		fmt.Println("Error inserting task to db:", err)
 		os.Exit(1)
