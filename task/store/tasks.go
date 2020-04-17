@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -20,9 +21,10 @@ type Store struct {
 
 // Task represents a single task
 type Task struct {
-	ID    int
-	Value string
-	Done  bool
+	ID        int
+	Value     string
+	Done      bool
+	TimeStamp string
 }
 
 // NewStore creates and bootstraps a new task store
@@ -57,7 +59,7 @@ func (s *Store) bootstrap() error {
 
 // InsertTask inserts a new task into DB
 func (s *Store) InsertTask(data string) error {
-	t := Task{Value: data, Done: false}
+	t := Task{Value: data, Done: false, TimeStamp: time.Now().Format(time.RFC3339)}
 
 	return s.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketName)
@@ -121,6 +123,59 @@ func (s *Store) GetActiveTasks() ([]Task, error) {
 	return tasks, nil
 }
 
+// GetAllCompletedTasks return list of completed tasks
+func (s *Store) GetAllCompletedTasks() ([]Task, error) {
+	allTasks, err := s.GetAllTasks()
+	if err != nil {
+		return nil, err
+	}
+
+	var tasks []Task
+	for _, v := range allTasks {
+		if v.Done {
+			tasks = append(tasks, v)
+		}
+	}
+
+	return tasks, nil
+}
+
+// GetTasksDoneToday returns task which are marked as done today
+func (s *Store) GetTasksDoneToday() ([]Task, error) {
+	var tasks []Task
+	t := time.Now()
+	midnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+
+	err := s.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketName)
+		if b == nil {
+			return fmt.Errorf("Bucket doesn't exist")
+		}
+
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			var data Task
+			json.Unmarshal(v, &data)
+
+			tst, _ := time.Parse(time.RFC3339, data.TimeStamp)
+
+			if !data.Done {
+				continue
+			}
+			if tst.Before(midnight) {
+				continue
+			}
+
+			tasks = append(tasks, data)
+		}
+
+		return nil
+	})
+
+	return tasks, err
+}
+
 // CompleteTask marks a task as done given it's ID
 func (s *Store) CompleteTask(id int) (Task, error) {
 	var data Task
@@ -146,6 +201,7 @@ func (s *Store) CompleteTask(id int) (Task, error) {
 		}
 
 		data.Done = true
+		data.TimeStamp = time.Now().Format(time.RFC3339)
 		buf, err := json.Marshal(data)
 		if err != nil {
 			return fmt.Errorf("Error encoding json: %s", err)
